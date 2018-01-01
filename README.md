@@ -15,7 +15,7 @@ Supported OS are:
 
 Although meterpreter payloads are great, they are sometimes spotted by AV products.
 
-The goal of this project is to get a simple reverse shell, which can work on multiple systems,
+The goal of this project is to get a simple reverse shell, which can work on multiple systems.
 
 ## How ?
 

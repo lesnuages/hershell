@@ -12,7 +12,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"./shell"
+	"github.com/lesnuages/shell"
 )
 
 const (

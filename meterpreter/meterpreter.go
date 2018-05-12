@@ -13,8 +13,6 @@ import (
 	"github.com/lesnuages/hershell/shell"
 )
 
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-
 func Meterpreter(connType, address string) (bool, error) {
 	var (
 		ok  bool
@@ -56,6 +54,7 @@ func GetURIChecksumId() int {
 }
 
 func GenerateURIChecksum(length int) string {
+	var charset string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 	for {
 		var checksum int = 0
 		var uriString string

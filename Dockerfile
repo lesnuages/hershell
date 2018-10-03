@@ -11,10 +11,12 @@ ARG GOARCH=64
 # Easily download results from the container by running it and browsing to its port 8000
 # docker run -it -p "8000:8000" hershell:latest
 
+# todo add osx
 RUN make depends && make windows${GOARCH} LHOST=${LHOST} LPORT=${LPORT} \
-    && make linux${GOARCH} LHOST=${LHOST} LPORT=${LPORT} \ 
-    && cp server.key server.pem *.exe /go/bin/ \
-    && upx -kv -9 /go/bin/hershell /go/bin/hershell.exe
+    && make linux${GOARCH} LHOST=${LHOST} LPORT=${LPORT} \
+    && cp server.key server.pem *.exe /go/bin/
+    
+    # && upx -kv -9 /go/bin/hershell /go/bin/hershell.exe
 
 EXPOSE 8000
 ENTRYPOINT [ "serve", "-dir", "/go/bin/"]

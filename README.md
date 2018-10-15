@@ -186,3 +186,7 @@ Active sessions
 meterpreter > getuid
 Server username: DESKTOP-3PVV31A\lab
 ```
+
+## Credits
+
+[@khast3x](https://github.com/khast3x) for the Dockerfile feature

